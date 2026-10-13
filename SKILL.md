@@ -23,7 +23,7 @@ Create a single paper-oriented PDF while preserving the source notes and keeping
 - Keep body text, code, mathematics, tables, margins, line height, image width, and page-number position independently configurable.
 - Generate both a printed table of contents with page numbers and PDF bookmarks. Rebuild them whenever pagination changes.
 - Keep photographs and source figures in colour unless the user explicitly asks to desaturate them. A monochrome theme applies to text, rules, callouts, tables, and code backgrounds.
-- Start each source note on a new page unless the manifest opts out. Avoid orphaned headings and split code blocks, callouts, equations, rows, and figures where practical. For a short tail page, first let the following note continue on that page selectively; do not solve isolated pagination issues by shrinking the entire book.
+- Start each source note on a new page. Set `start_new_page` to `false` only when the user explicitly permits chapter continuation. Avoid orphaned headings and split code blocks, callouts, equations, rows, and figures where practical; solve short tail pages with heading spacing, widow/orphan rules, or tightly scoped internal spacing adjustments while preserving chapter boundaries.
 - Treat a one-page contents request as a density problem: first include all entries in one table, then tune contents font size, line height, row padding, and hierarchy indent without shrinking body text.
 - Permit Mermaid direction overrides and independent diagram bounds. Horizontal flowcharts may save vertical space; always preserve their aspect ratio.
 - Use MathML for mathematics and a user-controlled math scale. Do not rasterise ordinary equations.

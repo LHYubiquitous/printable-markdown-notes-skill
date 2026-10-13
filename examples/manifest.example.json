@@ -26,6 +26,6 @@
       "exclude_sections": ["Editorial Coverage Audit"],
       "exclude_lines_matching": ["Internal review only"]
     },
-    {"path": "Topics/01 First Topic.md", "level": 2, "start_new_page": false}
+    {"path": "Topics/01 First Topic.md", "level": 2}
   ]
 }

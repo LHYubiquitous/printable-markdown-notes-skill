@@ -20,7 +20,7 @@ Each file may specify:
 - `path`: required relative Markdown path.
 - `label`: optional printed contents/bookmark label; otherwise the first level-one heading or filename is used.
 - `level`: bookmark and contents hierarchy, normally `1` or `2`.
-- `start_new_page`: defaults to `true`.
+- `start_new_page`: defaults to `true`. Keep this default for book-style notes; set it to `false` only when the user explicitly allows one source note to continue on the previous note's final page.
 - `toc`: defaults to `true`.
 - `exclude_sections`: optional exact heading titles to remove only from the printed edition. Each match includes the heading and its contents up to the next heading of the same or higher level.
 - `exclude_lines_matching`: optional regular expressions; any complete source line matching a pattern is omitted only from the printed edition.
@@ -120,7 +120,7 @@ Optional manifest fields:
 
 The contents is generated in fixed-size chunks, then the document is printed twice. The first pass discovers the actual start page of every note. The second pass writes those values into the contents. Footer page numbers and bookmarks are added after pagination is stable.
 
-The build report also lists `sparse_page_candidates`: non-chapter-start pages with no images and fewer extracted characters than `sparse_page_char_threshold`. Review them visually before delivery; the list is a pagination heuristic, not an automatic deletion rule. If a sparse page is only the tail of one note, selectively set the next file's `start_new_page` to `false` instead of globally shrinking the document. Rebuild and visually confirm that the new mid-page heading remains easy to scan.
+The build report also lists `sparse_page_candidates`: non-chapter-start pages with no images and fewer extracted characters than `sparse_page_char_threshold`. Review them visually before delivery; the list is a pagination heuristic, not an automatic deletion rule. When chapter starts must remain on new pages, correct a sparse tail by tightening heading spacing or another narrowly scoped internal spacing rule, then rebuild and inspect it. Do not disable the next chapter's page break unless the user explicitly approves continuation.
 
 ## Mermaid
 
