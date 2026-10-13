@@ -1,5 +1,7 @@
 # Printable Markdown Notes Skill
 
+[中文文档](README.zh-CN.md)
+
 A Codex skill and deterministic exporter for turning an ordered Markdown or Obsidian vault into one print-ready PDF.
 
 Features:
