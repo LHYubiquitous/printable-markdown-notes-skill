@@ -22,6 +22,10 @@ Each file may specify:
 - `level`: bookmark and contents hierarchy, normally `1` or `2`.
 - `start_new_page`: defaults to `true`.
 - `toc`: defaults to `true`.
+- `exclude_sections`: optional exact heading titles to remove only from the printed edition. Each match includes the heading and its contents up to the next heading of the same or higher level.
+- `exclude_lines_matching`: optional regular expressions; any complete source line matching a pattern is omitted only from the printed edition.
+
+Use print-only exclusions for internal coverage audits, editorial status notes, or other vault material that should remain in Markdown but not consume paper. Prefer `exclude_sections` to broad line patterns.
 
 ## Layout settings
 
@@ -40,7 +44,13 @@ Place overrides under `style`. Omitted values use the exporter defaults.
     "h1_line_height": 1.08,
     "h1_space_after_mm": 2.8,
     "h2_font_pt": 12.8,
+    "h2_line_height": 1.16,
+    "h2_space_before_mm": 4,
+    "h2_space_after_mm": 2.1,
     "h3_font_pt": 11.4,
+    "h3_line_height": 1.16,
+    "h3_space_before_mm": 3,
+    "h3_space_after_mm": 1.2,
     "code_font_pt": 9.25,
     "math_scale_percent": 100,
     "table_font_pt": 9.15,
@@ -49,7 +59,17 @@ Place overrides under `style`. Omitted values use the exporter defaults.
     "image_width_percent": 72,
     "page_number_y_pt": 9,
     "grayscale_text": true,
-    "toc_entries_per_page": 20
+    "toc_entries_per_page": 20,
+    "toc_font_pt": 10.4,
+    "toc_line_height": 1.15,
+    "toc_row_vertical_mm": 1.2,
+    "toc_level_2_indent_mm": 5,
+    "toc_heading_space_after_mm": 4,
+    "toc_table_space_before_mm": 2.5,
+    "diagram_max_height_mm": 200,
+    "diagram_max_width_percent": 92,
+    "diagram_show_caption": true,
+    "sparse_page_char_threshold": 120
   }
 }
 ```
@@ -60,6 +80,9 @@ Useful independent adjustments:
 - Set `body_font_pt` without changing `code_font_pt` or `math_scale_percent`.
 - Increase `math_scale_percent` when equations need emphasis without enlarging prose.
 - Reduce `table_cell_vertical_mm` to make long reference tables denser.
+- Reduce the `h2_*` and `h3_*` spacing values to reclaim space without shrinking body text.
+- Set `toc_entries_per_page` to `0` to place all entries in one contents table; then tune `toc_font_pt`, `toc_line_height`, and `toc_row_vertical_mm` until it fits one page.
+- Use `diagram_max_height_mm` and `diagram_max_width_percent` to limit diagrams while preserving aspect ratio.
 - Move footer numbers with `page_number_y_pt`; keep sufficient bottom margin to avoid collisions.
 - Set `grayscale_text` to `false` to use the optional accent colour. Images remain in colour either way.
 
@@ -97,6 +120,8 @@ Optional manifest fields:
 
 The contents is generated in fixed-size chunks, then the document is printed twice. The first pass discovers the actual start page of every note. The second pass writes those values into the contents. Footer page numbers and bookmarks are added after pagination is stable.
 
+The build report also lists `sparse_page_candidates`: non-chapter-start pages with no images and fewer extracted characters than `sparse_page_char_threshold`. Review them visually before delivery; the list is a pagination heuristic, not an automatic deletion rule. If a sparse page is only the tail of one note, selectively set the next file's `start_new_page` to `false` instead of globally shrinking the document. Rebuild and visually confirm that the new mid-page heading remains easy to scan.
+
 ## Mermaid
 
 The exporter checks for `mmdc`. To use another command, provide a command array:
@@ -105,6 +130,7 @@ The exporter checks for `mmdc`. To use another command, provide a command array:
 {
   "mermaid": {
     "mode": "render",
+    "direction": "LR",
     "command": ["npx.cmd", "-y", "@mermaid-js/mermaid-cli"],
     "browser_executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
   }
@@ -116,5 +142,7 @@ Modes:
 - `render`: diagram failure stops the build.
 - `auto`: render when a command is available; otherwise retain a labelled code fallback and record a warning.
 - `code`: deliberately retain Mermaid source as a printable code block.
+
+Set `direction` to `LR`, `RL`, `TD`, `TB`, or `BT` to override the first `flowchart`/`graph` direction in every Mermaid block. Use `preserve` to keep the source direction. A horizontal direction often saves vertical print space, while the diagram height and width limits remain independent style controls.
 
 For `npx`, network access may be required on the first run. Do not download packages without the user's authorization.

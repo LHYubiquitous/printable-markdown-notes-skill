@@ -22,6 +22,44 @@ class ExportNotesTests(unittest.TestCase):
         self.assertEqual(MODULE.width_percent("80%", style), 80)
         self.assertAlmostEqual(MODULE.width_percent("650", style), 650 / 9)
 
+    def test_mermaid_direction_can_be_preserved_or_overridden(self):
+        source = "flowchart TD\nA --> B\n"
+        self.assertEqual(MODULE.orient_mermaid(source, "preserve"), source)
+        self.assertTrue(MODULE.orient_mermaid(source, "LR").startswith("flowchart LR"))
+        with self.assertRaises(ValueError):
+            MODULE.orient_mermaid(source, "diagonal")
+
+    def test_print_only_exclusions_are_stored_on_note(self):
+        with tempfile.TemporaryDirectory(dir=ROOT / "tests") as parent:
+            vault = Path(parent)
+            (vault / "Index.md").write_text("# Index\n", encoding="utf-8")
+            notes = MODULE.build_notes(
+                vault,
+                {
+                    "files": [
+                        {
+                            "path": "Index.md",
+                            "exclude_sections": ["2. Audit"],
+                            "exclude_lines_matching": ["Internal only"],
+                        }
+                    ]
+                },
+            )
+            self.assertEqual(notes[0].exclude_sections, ["2. Audit"])
+            self.assertEqual(notes[0].exclude_lines_matching, ["Internal only"])
+
+            warnings = []
+            filtered = MODULE.apply_print_exclusions(
+                "# Index\nKeep\n## 2. Audit\nRemove\n### Detail\nRemove too\n## 3. Study\nKeep too\nInternal only\n",
+                notes[0],
+                warnings,
+            )
+            self.assertNotIn("Audit", filtered)
+            self.assertNotIn("Remove", filtered)
+            self.assertNotIn("Internal only", filtered)
+            self.assertIn("## 3. Study", filtered)
+            self.assertEqual(warnings, [])
+
     def test_work_directory_must_be_empty(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "tests") as parent:
             output = Path(parent) / "notes.pdf"

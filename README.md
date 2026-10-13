@@ -9,6 +9,9 @@ Features:
 - MathML equations, code blocks, dense tables and optional Mermaid rendering;
 - independent controls for body, heading, code, table and mathematics sizes;
 - configurable A4 margins, line height, table padding, image width and page-number position;
+- compact single-page contents controls, heading-spacing controls and sparse-tail-page reporting;
+- print-only file, section and line exclusions, plus selective chapter continuation for orphan control;
+- optional horizontal Mermaid flowcharts with independent diagram bounds;
 - per-image width overrides with aspect ratio preserved;
 - two-pass pagination and a machine-readable build report.
 

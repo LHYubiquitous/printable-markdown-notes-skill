@@ -36,7 +36,13 @@ DEFAULT_STYLE: dict[str, Any] = {
     "h1_line_height": 1.08,
     "h1_space_after_mm": 2.8,
     "h2_font_pt": 12.8,
+    "h2_line_height": 1.16,
+    "h2_space_before_mm": 4.0,
+    "h2_space_after_mm": 2.1,
     "h3_font_pt": 11.4,
+    "h3_line_height": 1.16,
+    "h3_space_before_mm": 3.0,
+    "h3_space_after_mm": 1.2,
     "code_font_pt": 9.25,
     "math_scale_percent": 100,
     "table_font_pt": 9.15,
@@ -48,6 +54,15 @@ DEFAULT_STYLE: dict[str, Any] = {
     "grayscale_text": True,
     "toc_entries_per_page": 20,
     "toc_font_pt": 10.4,
+    "toc_line_height": 1.15,
+    "toc_row_vertical_mm": 1.2,
+    "toc_level_2_indent_mm": 5,
+    "toc_heading_space_after_mm": 4,
+    "toc_table_space_before_mm": 2.5,
+    "diagram_max_height_mm": 200,
+    "diagram_max_width_percent": 92,
+    "diagram_show_caption": True,
+    "sparse_page_char_threshold": 120,
 }
 
 
@@ -60,6 +75,8 @@ class Note:
     level: int
     start_new_page: bool
     toc: bool
+    exclude_sections: list[str]
+    exclude_lines_matching: list[str]
     anchor: str
     marker: str
     content: str = ""
@@ -178,6 +195,8 @@ def build_notes(vault: Path, manifest: dict[str, Any]) -> list[Note]:
                 level=max(1, int(spec.get("level", 1))),
                 start_new_page=bool(spec.get("start_new_page", True)),
                 toc=bool(spec.get("toc", True)),
+                exclude_sections=[str(item) for item in spec.get("exclude_sections", [])],
+                exclude_lines_matching=[str(item) for item in spec.get("exclude_lines_matching", [])],
                 anchor=f"note-{index:03d}",
                 marker=f"PRINT_NOTE_{index:03d}",
             )
@@ -224,6 +243,21 @@ def width_percent(raw: str | None, style: dict[str, Any]) -> float:
     return max(5.0, min(100.0, pixels / reference * 100.0))
 
 
+def orient_mermaid(code: str, direction: str) -> str:
+    """Optionally override the first Mermaid flowchart direction."""
+    direction = direction.strip().upper()
+    if direction in {"", "PRESERVE"}:
+        return code
+    if direction not in {"LR", "RL", "TD", "TB", "BT"}:
+        raise ValueError(f"Unsupported Mermaid direction: {direction}")
+    return re.sub(
+        r"(?im)^(\s*(?:flowchart|graph)\s+)(TD|TB|BT|RL|LR)\b",
+        lambda match: match.group(1) + direction,
+        code,
+        count=1,
+    )
+
+
 def render_mermaid(
     code: str,
     work_dir: Path,
@@ -233,6 +267,7 @@ def render_mermaid(
 ) -> str:
     config = manifest.get("mermaid", {})
     mode = str(config.get("mode", "auto")).lower()
+    code = orient_mermaid(code, str(config.get("direction", "preserve")))
     if mode == "code":
         return f"```text\n[Mermaid diagram source]\n{code.rstrip()}\n```"
     command = config.get("command")
@@ -285,6 +320,31 @@ def render_mermaid(
     return f"![Flowchart]({output.as_uri()}){{.diagram width=92%}}"
 
 
+def apply_print_exclusions(text: str, note: Note, warnings: list[str]) -> str:
+    """Apply manifest filters without modifying the Markdown source file."""
+    for title in note.exclude_sections:
+        heading = re.search(
+            rf"(?m)^(?P<marks>#+)\s+{re.escape(title)}\s*$",
+            text,
+        )
+        if not heading:
+            warnings.append(f"Excluded section not found in {note.relative}: {title}")
+            continue
+        level = len(heading.group("marks"))
+        following = re.search(rf"(?m)^#{{1,{level}}}\s+", text[heading.end():])
+        end = heading.end() + following.start() if following else len(text)
+        text = text[:heading.start()] + text[end:]
+
+    for pattern in note.exclude_lines_matching:
+        try:
+            text = re.sub(rf"(?m)^.*(?:{pattern}).*(?:\r?\n|$)", "", text)
+        except re.error as exc:
+            raise ValueError(
+                f"Invalid exclude_lines_matching pattern in {note.relative}: {pattern}"
+            ) from exc
+    return text
+
+
 def preprocess_note(
     note: Note,
     vault: Path,
@@ -297,6 +357,10 @@ def preprocess_note(
 ) -> str:
     text = strip_frontmatter(note.path.read_text(encoding="utf-8-sig"))
     text = re.sub(r"%%.*?%%", "", text, flags=re.S)
+
+    # Print-only filtering keeps review/audit material in the source vault while
+    # omitting it from a particular edition.
+    text = apply_print_exclusions(text, note, warnings)
 
     def mermaid_repl(match: re.Match[str]) -> str:
         return render_mermaid(match.group(1), work_dir, manifest, browser, warnings)
@@ -359,12 +423,26 @@ def make_css(template_path: Path, target: Path, style: dict[str, Any]) -> None:
         "H1_LINE_HEIGHT": style["h1_line_height"],
         "H1_AFTER": style["h1_space_after_mm"],
         "H2_SIZE": style["h2_font_pt"],
+        "H2_LINE_HEIGHT": style["h2_line_height"],
+        "H2_BEFORE": style["h2_space_before_mm"],
+        "H2_AFTER": style["h2_space_after_mm"],
         "H3_SIZE": style["h3_font_pt"],
+        "H3_LINE_HEIGHT": style["h3_line_height"],
+        "H3_BEFORE": style["h3_space_before_mm"],
+        "H3_AFTER": style["h3_space_after_mm"],
         "TABLE_SIZE": style["table_font_pt"],
         "TABLE_VPAD": style["table_cell_vertical_mm"],
         "TABLE_HPAD": style["table_cell_horizontal_mm"],
         "CODE_SIZE": style["code_font_pt"],
         "TOC_SIZE": style["toc_font_pt"],
+        "TOC_LINE_HEIGHT": style["toc_line_height"],
+        "TOC_ROW_VPAD": style["toc_row_vertical_mm"],
+        "TOC_LEVEL_2_INDENT": style["toc_level_2_indent_mm"],
+        "TOC_H1_AFTER": style["toc_heading_space_after_mm"],
+        "TOC_TABLE_BEFORE": style["toc_table_space_before_mm"],
+        "DIAGRAM_MAX_HEIGHT": style["diagram_max_height_mm"],
+        "DIAGRAM_MAX_WIDTH": style["diagram_max_width_percent"],
+        "DIAGRAM_CAPTION_DISPLAY": "block" if style["diagram_show_caption"] else "none",
     }
     css = template_path.read_text(encoding="utf-8")
     for key, value in tokens.items():
@@ -393,7 +471,9 @@ def cover_markdown(manifest: dict[str, Any]) -> str:
 
 def toc_markdown(notes: list[Note], style: dict[str, Any], page_map: dict[int, int] | None) -> str:
     entries = [note for note in notes if note.toc]
-    size = max(1, int(style["toc_entries_per_page"]))
+    configured_size = int(style["toc_entries_per_page"])
+    size = len(entries) if configured_size <= 0 else configured_size
+    size = max(1, size)
     chunks = [entries[i : i + size] for i in range(0, len(entries), size)]
     sections: list[str] = []
     for chunk_index, chunk in enumerate(chunks):
@@ -486,7 +566,7 @@ def add_footer_and_bookmarks(
     notes: list[Note],
     page_map: dict[int, int],
     style: dict[str, Any],
-) -> tuple[int, list[int]]:
+) -> tuple[int, list[int], list[dict[str, int]]]:
     reader = PdfReader(str(source))
     writer = PdfWriter()
     total = len(reader.pages)
@@ -495,10 +575,21 @@ def add_footer_and_bookmarks(
     start_at = int(footer.get("start_at", 1))
     y = float(style["page_number_y_pt"])
     blank_candidates: list[int] = []
+    sparse_candidates: list[dict[str, int]] = []
+    sparse_threshold = max(0, int(style.get("sparse_page_char_threshold", 0)))
+    note_start_pages = set(page_map.values())
     for index, page in enumerate(reader.pages):
         text = (page.extract_text() or "").strip()
-        if len(text) < 2 and not page_has_images(page):
+        has_images = page_has_images(page)
+        if len(text) < 2 and not has_images:
             blank_candidates.append(index + 1)
+        elif (
+            sparse_threshold
+            and len(text) < sparse_threshold
+            and not has_images
+            and index + 1 not in note_start_pages
+        ):
+            sparse_candidates.append({"page": index + 1, "characters": len(text)})
         width = float(page.mediabox.width)
         height = float(page.mediabox.height)
         overlay = BytesIO()
@@ -534,7 +625,7 @@ def add_footer_and_bookmarks(
             del parents[deeper]
     with target.open("wb") as stream:
         writer.write(stream)
-    return total, blank_candidates
+    return total, blank_candidates, sparse_candidates
 
 
 def main() -> int:
@@ -578,7 +669,7 @@ def main() -> int:
     if final_map != first_map:
         raise RuntimeError(f"Pagination changed between passes: first={first_map}, final={final_map}")
 
-    total_pages, blank_candidates = add_footer_and_bookmarks(
+    total_pages, blank_candidates, sparse_candidates = add_footer_and_bookmarks(
         pass2_pdf, output, manifest, notes, final_map, style
     )
     report = {
@@ -587,6 +678,7 @@ def main() -> int:
         "notes": len(notes),
         "note_pages": {note.relative: final_map[note.index] for note in notes},
         "blank_page_candidates": blank_candidates,
+        "sparse_page_candidates": sparse_candidates,
         "warnings": warnings,
         "work_dir": str(work_dir) if args.keep_work_dir else None,
         "tools": {"pandoc": str(pandoc), "browser": str(browser)},

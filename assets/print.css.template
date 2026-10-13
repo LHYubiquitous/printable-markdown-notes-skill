@@ -39,8 +39,8 @@ h1 {
   margin: 0 0 @@H1_AFTER@@mm;
   padding-bottom: 1mm;
 }
-h2 { font-size: @@H2_SIZE@@pt; line-height: 1.22; margin: 4.8mm 0 2.8mm; }
-h3 { color: #444; font-size: @@H3_SIZE@@pt; line-height: 1.2; margin: 3.5mm 0 1.5mm; }
+h2 { font-size: @@H2_SIZE@@pt; line-height: @@H2_LINE_HEIGHT@@; margin: @@H2_BEFORE@@mm 0 @@H2_AFTER@@mm; }
+h3 { color: #444; font-size: @@H3_SIZE@@pt; line-height: @@H3_LINE_HEIGHT@@; margin: @@H3_BEFORE@@mm 0 @@H3_AFTER@@mm; }
 h4 { font-size: 1em; margin: 3mm 0 1.2mm; }
 h1 + h2 { margin-top: 3.2mm; }
 h2 + table { margin-top: 3.2mm; }
@@ -112,10 +112,11 @@ img.diagram {
   break-inside: avoid;
   height: auto !important;
   margin: 2.5mm auto;
-  max-height: 232mm !important;
-  max-width: 92%;
+  max-height: @@DIAGRAM_MAX_HEIGHT@@mm !important;
+  max-width: @@DIAGRAM_MAX_WIDTH@@%;
   width: auto !important;
 }
+figure:has(img.diagram) figcaption { display: @@DIAGRAM_CAPTION_DISPLAY@@; }
 figcaption { color: var(--muted); font-size: 0.9em; text-align: center; }
 
 .page-break { break-after: page; page-break-after: always; }
@@ -146,10 +147,10 @@ figcaption { color: var(--muted); font-size: 0.9em; text-align: center; }
 .cover h3 { color: #444; font-size: 13pt; margin: 0 0 12mm; }
 .cover-meta { border-left: 4pt solid #555; color: #333; line-height: 1.48; margin-top: 10mm; padding: 2mm 0 2mm 4mm; }
 
-.toc-page h1 { margin-bottom: 5mm; }
-.toc-table { font-size: @@TOC_SIZE@@pt; margin-top: 4mm; }
-.toc-table td { background: #fff !important; border: 0; border-bottom: 0.5pt solid #c5c5c5; padding: 1.7mm 0; }
-.toc-table td.toc-level-2 { padding-left: 5mm; }
+.toc-page h1 { margin-bottom: @@TOC_H1_AFTER@@mm; }
+.toc-table { font-size: @@TOC_SIZE@@pt; line-height: @@TOC_LINE_HEIGHT@@; margin-top: @@TOC_TABLE_BEFORE@@mm; }
+.toc-table td { background: #fff !important; border: 0; border-bottom: 0.5pt solid #c5c5c5; padding: @@TOC_ROW_VPAD@@mm 0; }
+.toc-table td.toc-level-2 { padding-left: @@TOC_LEVEL_2_INDENT@@mm; }
 .toc-table td:last-child { font-variant-numeric: tabular-nums; text-align: right; width: 14mm; }
 
 a, a:visited { color: inherit; text-decoration: none; }

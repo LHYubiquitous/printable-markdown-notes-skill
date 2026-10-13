@@ -10,10 +10,22 @@
     "body_font_pt": 10.4,
     "math_scale_percent": 100,
     "image_width_percent": 80,
+    "toc_entries_per_page": 0,
+    "toc_font_pt": 8,
+    "diagram_max_height_mm": 160,
     "grayscale_text": true
   },
+  "mermaid": {
+    "mode": "auto",
+    "direction": "LR"
+  },
   "files": [
-    {"path": "00 Index.md", "level": 1},
-    {"path": "Topics/01 First Topic.md", "level": 2}
+    {
+      "path": "00 Index.md",
+      "level": 1,
+      "exclude_sections": ["Editorial Coverage Audit"],
+      "exclude_lines_matching": ["Internal review only"]
+    },
+    {"path": "Topics/01 First Topic.md", "level": 2, "start_new_page": false}
   ]
 }
