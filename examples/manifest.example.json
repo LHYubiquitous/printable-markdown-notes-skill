@@ -1,0 +1,19 @@
+{
+  "title": "Example Notes",
+  "subtitle": "Printable Edition",
+  "language": "en",
+  "cover": {
+    "details": ["A4 portrait", "Duplex friendly"],
+    "notice": "Generated from Markdown sources"
+  },
+  "style": {
+    "body_font_pt": 10.4,
+    "math_scale_percent": 100,
+    "image_width_percent": 80,
+    "grayscale_text": true
+  },
+  "files": [
+    {"path": "00 Index.md", "level": 1},
+    {"path": "Topics/01 First Topic.md", "level": 2}
+  ]
+}

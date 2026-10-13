@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.print-work/
+.*.print-*/
+output/
+node_modules/
+.DS_Store

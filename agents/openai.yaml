@@ -1,0 +1,4 @@
+interface:
+  display_name: "Printable Markdown Notes"
+  short_description: "Export Markdown and Obsidian vaults as print-ready PDFs"
+  default_prompt: "Use $printable-markdown-notes to export this Markdown collection as a configurable print-ready PDF."

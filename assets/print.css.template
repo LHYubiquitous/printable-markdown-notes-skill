@@ -1,0 +1,161 @@
+@page {
+  size: A4;
+  margin: @@MARGIN_TOP@@mm @@MARGIN_RIGHT@@mm @@MARGIN_BOTTOM@@mm @@MARGIN_LEFT@@mm;
+}
+
+:root {
+  --ink: @@INK@@;
+  --muted: @@MUTED@@;
+  --line: @@LINE@@;
+  --wash: @@WASH@@;
+  --body-size: @@BODY_SIZE@@pt;
+  --line-height: @@LINE_HEIGHT@@;
+  --math-size: @@MATH_SIZE@@%;
+  --image-width: @@IMAGE_WIDTH@@%;
+}
+
+html { font-size: var(--body-size); }
+body {
+  color: var(--ink);
+  background: #fff;
+  font-family: "Aptos", "Segoe UI", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  font-size: var(--body-size);
+  line-height: var(--line-height);
+  margin: 0;
+  orphans: 3;
+  widows: 3;
+}
+
+h1, h2, h3, h4 {
+  break-after: avoid-page;
+  color: var(--ink);
+  font-weight: 650;
+  page-break-after: avoid;
+}
+h1 {
+  border-bottom: 1.2pt solid var(--ink);
+  font-size: @@H1_SIZE@@pt;
+  line-height: @@H1_LINE_HEIGHT@@;
+  margin: 0 0 @@H1_AFTER@@mm;
+  padding-bottom: 1mm;
+}
+h2 { font-size: @@H2_SIZE@@pt; line-height: 1.22; margin: 4.8mm 0 2.8mm; }
+h3 { color: #444; font-size: @@H3_SIZE@@pt; line-height: 1.2; margin: 3.5mm 0 1.5mm; }
+h4 { font-size: 1em; margin: 3mm 0 1.2mm; }
+h1 + h2 { margin-top: 3.2mm; }
+h2 + table { margin-top: 3.2mm; }
+
+p { margin: 0 0 2mm; }
+ul, ol { margin: 1mm 0 2.2mm; padding-left: 5.5mm; }
+li { margin: 0.45mm 0; }
+
+table {
+  border-collapse: collapse;
+  font-size: @@TABLE_SIZE@@pt;
+  line-height: 1.2;
+  margin: 2mm 0 3mm;
+  width: 100%;
+}
+thead { display: table-header-group; }
+tr { break-inside: avoid; page-break-inside: avoid; }
+th, td {
+  border: 0.6pt solid var(--line);
+  padding: @@TABLE_VPAD@@mm @@TABLE_HPAD@@mm;
+  vertical-align: top;
+}
+th { background: #e4e4e4; color: #1f1f1f; font-weight: 650; }
+tbody tr:nth-child(even) td { background: #f7f7f7; }
+
+blockquote {
+  background: var(--wash);
+  border-left: 3pt solid #555;
+  break-inside: avoid;
+  color: #252525;
+  margin: 2.5mm 0;
+  padding: 2.2mm 3mm;
+}
+blockquote p:last-child { margin-bottom: 0; }
+
+code {
+  color: #111;
+  font-family: "Cascadia Mono", "Consolas", monospace;
+  font-size: 0.95em;
+}
+pre {
+  background: #f5f5f5;
+  border: 0.6pt solid #c6c6c6;
+  border-radius: 2mm;
+  break-inside: avoid;
+  color: #111;
+  font-size: @@CODE_SIZE@@pt;
+  line-height: 1.28;
+  margin: 2.5mm 0 3mm;
+  padding: 2.5mm;
+  white-space: pre-wrap;
+}
+.sourceCode span, code span { color: #111 !important; }
+
+math, .math { font-size: var(--math-size); }
+.display.math, math[display="block"] { break-inside: avoid; }
+
+img {
+  display: block;
+  height: auto !important;
+  margin: 3mm auto 2mm;
+  max-height: none;
+  max-width: 100%;
+  object-fit: contain;
+}
+figure, .figure { break-inside: avoid; margin: 2.5mm auto; }
+figure img, img.note-image { width: var(--image-width); }
+img.diagram {
+  break-inside: avoid;
+  height: auto !important;
+  margin: 2.5mm auto;
+  max-height: 232mm !important;
+  max-width: 92%;
+  width: auto !important;
+}
+figcaption { color: var(--muted); font-size: 0.9em; text-align: center; }
+
+.page-break { break-after: page; page-break-after: always; }
+.note-break {
+  break-before: page;
+  height: 0;
+  page-break-before: always;
+}
+.note-marker {
+  color: #fff;
+  font-size: 1px;
+  display: block;
+  height: 1px;
+  line-height: 1px;
+  margin: 0;
+  overflow: visible;
+}
+
+.cover {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  height: 249mm;
+  justify-content: center;
+}
+.cover h1 { border-bottom: 2pt solid var(--ink); font-size: 32pt; margin-bottom: 5mm; padding-bottom: 4mm; width: 100%; }
+.cover h2 { font-size: 17pt; margin: 0 0 3mm; }
+.cover h3 { color: #444; font-size: 13pt; margin: 0 0 12mm; }
+.cover-meta { border-left: 4pt solid #555; color: #333; line-height: 1.48; margin-top: 10mm; padding: 2mm 0 2mm 4mm; }
+
+.toc-page h1 { margin-bottom: 5mm; }
+.toc-table { font-size: @@TOC_SIZE@@pt; margin-top: 4mm; }
+.toc-table td { background: #fff !important; border: 0; border-bottom: 0.5pt solid #c5c5c5; padding: 1.7mm 0; }
+.toc-table td.toc-level-2 { padding-left: 5mm; }
+.toc-table td:last-child { font-variant-numeric: tabular-nums; text-align: right; width: 14mm; }
+
+a, a:visited { color: inherit; text-decoration: none; }
+mark { background: #e5e5e5; color: #111; padding: 0 0.08em; }
+em { color: var(--muted); }
+
+@media print {
+  a { color: inherit; text-decoration: none; }
+}
